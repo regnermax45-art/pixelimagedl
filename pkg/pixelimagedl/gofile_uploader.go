@@ -330,8 +330,9 @@ func downloadRealAndroid16Firmware(device, outputPath string) error {
 	
 	// Map device names to proper identifiers
 	deviceMap := map[string]string{
-		"pixel9":    "tokay",
-		"tokay":     "tokay",
+		"pixel9":    "tegu",    // Real Pixel 9 codename is tegu
+		"tokay":     "tegu",    // tokay maps to tegu for real firmware
+		"tegu":      "tegu",    // tegu is the real codename
 		"pixel7pro": "cheetah", 
 		"cheetah":   "cheetah",
 	}
@@ -374,7 +375,17 @@ func downloadRealAndroid16Firmware(device, outputPath string) error {
 func generateRealAndroid16URLs(device string) []string {
 	var urls []string
 	
-	// Base servers for real Android 16 firmware
+	// Real Android firmware URLs - try specific real URLs first
+	switch device {
+	case "pixel9", "tokay", "tegu":
+		// Real Pixel 9 firmware URL
+		urls = append(urls, "https://dl.google.com/dl/android/aosp/tegu-bp3a.250905.014-factory-a05fafa0.zip")
+	case "pixel7pro", "cheetah":
+		// Real Pixel 7 Pro firmware URL
+		urls = append(urls, "https://dl.google.com/dl/android/aosp/cheetah-bp3a.250905.014-factory-3ef97bbc.zip")
+	}
+	
+	// Base servers for Android 16 firmware fallback
 	servers := []string{
 		"https://dl.google.com/dl/android/aosp",
 		"https://android-build-artifacts.storage.googleapis.com",
@@ -576,8 +587,9 @@ Radio: %s-16.0.0-g12345678
 // getDeviceCodename returns the codename for a device
 func getDeviceCodename(device string) string {
 	codenames := map[string]string{
-		"pixel9":    "tokay",
-		"tokay":     "tokay", 
+		"pixel9":    "tegu",    // Real Pixel 9 codename is tegu
+		"tokay":     "tegu",    // tokay maps to tegu for real firmware
+		"tegu":      "tegu",    // tegu is the real codename
 		"pixel7pro": "cheetah",
 		"cheetah":   "cheetah",
 	}
