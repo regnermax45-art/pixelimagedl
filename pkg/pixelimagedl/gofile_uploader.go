@@ -2,6 +2,7 @@ package pixelimagedl
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -324,9 +325,9 @@ func ExecuteAndroid16PortingWithOptions(sourceDevice, targetDevice string, uploa
 	return nil
 }
 
-// downloadRealAndroid16Firmware downloads real Android 16 firmware using custom server
+// downloadRealAndroid16Firmware downloads real Android 16 firmware using custom server or local files
 func downloadRealAndroid16Firmware(device, outputPath string) error {
-	log.Printf("🔥 Downloading REAL Android 16 firmware for %s", device)
+	log.Printf("🔥 Getting REAL Android 16 firmware for %s", device)
 	
 	// Map device names to proper identifiers
 	deviceMap := map[string]string{
@@ -344,9 +345,61 @@ func downloadRealAndroid16Firmware(device, outputPath string) error {
 	
 	log.Printf("📱 Device mapping: %s → %s", device, urlDevice)
 	
-	// Real Android 16 firmware URLs (195 custom URLs)
-	firmwareURLs := generateRealAndroid16URLs(urlDevice)
+	// FIRST: Check for local firmware files
+	localFirmwarePaths := []string{
+		// Check for device-specific local firmware files
+		fmt.Sprintf("%s-firmware.zip", device),
+		fmt.Sprintf("%s_firmware.zip", device),
+		fmt.Sprintf("%s-factory.zip", device),
+		fmt.Sprintf("%s_factory.zip", device),
+		fmt.Sprintf("android16_%s_factory.zip", device),
+		fmt.Sprintf("android16-%s-factory.zip", device),
+		// Check for codename-specific local firmware files
+		fmt.Sprintf("%s-firmware.zip", urlDevice),
+		fmt.Sprintf("%s_firmware.zip", urlDevice),
+		fmt.Sprintf("%s-factory.zip", urlDevice),
+		fmt.Sprintf("%s_factory.zip", urlDevice),
+		fmt.Sprintf("android16_%s_factory.zip", urlDevice),
+		fmt.Sprintf("android16-%s-factory.zip", urlDevice),
+		// Check for real firmware filenames
+		fmt.Sprintf("%s-bp3a.250905.014-factory-a05fafa0.zip", urlDevice),
+		fmt.Sprintf("%s-bp3a.250905.014-factory-3ef97bbc.zip", urlDevice),
+		// Generic local firmware files
+		"pixel9-firmware.zip",
+		"pixel7pro-firmware.zip",
+		"tegu-firmware.zip",
+		"cheetah-firmware.zip",
+		"pixel9_factory.zip",
+		"pixel7pro_factory.zip",
+		"tegu_factory.zip",
+		"cheetah_factory.zip",
+	}
 	
+	log.Printf("🔍 Checking for local firmware files...")
+	for i, localPath := range localFirmwarePaths {
+		if fileInfo, err := os.Stat(localPath); err == nil && fileInfo.Size() > 0 {
+			log.Printf("✅ Found local firmware file: %s (%.2f GB)", localPath, float64(fileInfo.Size())/(1024*1024*1024))
+			
+			// Copy local file to output path
+			if err := copyLocalFirmware(localPath, outputPath); err != nil {
+				log.Printf("❌ Failed to copy local firmware: %v", err)
+				continue
+			}
+			
+			log.Printf("🎉 Using local firmware file: %s → %s", localPath, outputPath)
+			return nil
+		}
+		
+		// Log progress for first few attempts
+		if i < 5 {
+			log.Printf("🔍 Checking local file %d/%d: %s (not found)", i+1, len(localFirmwarePaths), localPath)
+		}
+	}
+	
+	log.Printf("⚠️ No local firmware files found, proceeding with download...")
+	
+	// SECOND: Try downloading from URLs if no local files found
+	firmwareURLs := generateRealAndroid16URLs(urlDevice)
 	log.Printf("🌐 Generated %d real firmware URLs for Android 16", len(firmwareURLs))
 	
 	// Try downloading from each URL
@@ -360,8 +413,8 @@ func downloadRealAndroid16Firmware(device, outputPath string) error {
 		
 		// Verify downloaded file
 		if fileInfo, err := os.Stat(outputPath); err == nil && fileInfo.Size() > 0 {
-			log.Printf("✅ Real Android 16 firmware downloaded: %s (%.2f MB)", 
-				outputPath, float64(fileInfo.Size())/(1024*1024))
+			log.Printf("✅ Real Android 16 firmware downloaded: %s (%.2f GB)", 
+				outputPath, float64(fileInfo.Size())/(1024*1024*1024))
 			return nil
 		}
 	}
@@ -369,6 +422,67 @@ func downloadRealAndroid16Firmware(device, outputPath string) error {
 	// If all URLs fail, create a realistic firmware file as fallback
 	log.Printf("⚠️ All real URLs failed, creating realistic firmware as fallback")
 	return createRealisticFirmware(outputPath, device, "android16")
+}
+
+// copyLocalFirmware copies a local firmware file to the output path with progress tracking
+func copyLocalFirmware(sourcePath, outputPath string) error {
+	log.Printf("📁 Copying local firmware: %s → %s", sourcePath, outputPath)
+	
+	// Open source file
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %v", err)
+	}
+	defer sourceFile.Close()
+	
+	// Get source file info
+	sourceInfo, err := sourceFile.Stat()
+	if err != nil {
+		return fmt.Errorf("failed to get source file info: %v", err)
+	}
+	
+	sourceSize := sourceInfo.Size()
+	log.Printf("📦 Local firmware size: %.2f GB", float64(sourceSize)/(1024*1024*1024))
+	
+	// Create output file
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %v", err)
+	}
+	defer outputFile.Close()
+	
+	// Copy with progress tracking
+	buffer := make([]byte, 1024*1024) // 1MB buffer
+	var copied int64
+	
+	log.Printf("🔄 Starting local firmware copy...")
+	
+	for {
+		n, err := sourceFile.Read(buffer)
+		if n > 0 {
+			if _, writeErr := outputFile.Write(buffer[:n]); writeErr != nil {
+				return fmt.Errorf("failed to write to output file: %v", writeErr)
+			}
+			copied += int64(n)
+			
+			// Progress indicator every 100MB
+			if copied%(100*1024*1024) == 0 {
+				progress := float64(copied) / float64(sourceSize) * 100
+				log.Printf("📋 Copy progress: %.1f%% (%.2f GB / %.2f GB)", 
+					progress, 
+					float64(copied)/(1024*1024*1024),
+					float64(sourceSize)/(1024*1024*1024))
+			}
+		}
+		
+		if err == io.EOF {
+			log.Printf("✅ Local firmware copy completed: %.2f GB", float64(copied)/(1024*1024*1024))
+			return nil
+		}
+		if err != nil {
+			return fmt.Errorf("failed to read source file: %v", err)
+		}
+	}
 }
 
 // generateRealAndroid16URLs generates real Android 16 firmware URLs
@@ -446,10 +560,23 @@ func generateRealAndroid16URLs(device string) []string {
 	return urls
 }
 
-// downloadFirmwareFromURL downloads firmware from a specific URL
+// downloadFirmwareFromURL downloads firmware from a specific URL with proper cancellation handling
 func downloadFirmwareFromURL(url, outputPath string) error {
+	// Create context with timeout for better cancellation handling
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	
+	// Create request with context
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+	
+	// Set user agent to avoid blocking
+	req.Header.Set("User-Agent", "pixelimagedl/1.0 (Android Firmware Downloader)")
+	
 	client := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 60 * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= 10 {
 				return fmt.Errorf("too many redirects")
@@ -458,23 +585,31 @@ func downloadFirmwareFromURL(url, outputPath string) error {
 		},
 	}
 	
-	resp, err := client.Get(url)
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to get URL: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		// Properly close response body to avoid cancellation issues
+		if resp.Body != nil {
+			io.Copy(io.Discard, resp.Body) // Drain body before closing
+			resp.Body.Close()
+		}
+	}()
 	
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 	
-	// Check content type
-	contentType := resp.Header.Get("Content-Type")
-	if !strings.Contains(contentType, "application/zip") && 
-	   !strings.Contains(contentType, "application/octet-stream") &&
-	   !strings.Contains(contentType, "application/x-zip") {
-		return fmt.Errorf("invalid content type: %s", contentType)
+	// Check content length for large files
+	contentLength := resp.ContentLength
+	if contentLength > 0 {
+		log.Printf("📦 Firmware size: %.2f GB", float64(contentLength)/(1024*1024*1024))
 	}
+	
+	// Check content type (more permissive for real firmware)
+	contentType := resp.Header.Get("Content-Type")
+	log.Printf("📋 Content-Type: %s", contentType)
 	
 	// Create output file
 	file, err := os.Create(outputPath)
@@ -483,10 +618,40 @@ func downloadFirmwareFromURL(url, outputPath string) error {
 	}
 	defer file.Close()
 	
-	// Download with progress
-	_, err = io.Copy(file, resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to download: %v", err)
+	// Download with progress and proper cancellation handling
+	buffer := make([]byte, 32*1024) // 32KB buffer
+	var downloaded int64
+	
+	for {
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("download cancelled: %v", ctx.Err())
+		default:
+			n, err := resp.Body.Read(buffer)
+			if n > 0 {
+				if _, writeErr := file.Write(buffer[:n]); writeErr != nil {
+					return fmt.Errorf("failed to write to file: %v", writeErr)
+				}
+				downloaded += int64(n)
+				
+				// Progress indicator for large downloads
+				if contentLength > 0 && downloaded%(50*1024*1024) == 0 { // Every 50MB
+					progress := float64(downloaded) / float64(contentLength) * 100
+					log.Printf("📥 Download progress: %.1f%% (%.2f GB / %.2f GB)", 
+						progress, 
+						float64(downloaded)/(1024*1024*1024),
+						float64(contentLength)/(1024*1024*1024))
+				}
+			}
+			
+			if err == io.EOF {
+				log.Printf("✅ Download completed: %.2f GB", float64(downloaded)/(1024*1024*1024))
+				return nil
+			}
+			if err != nil {
+				return fmt.Errorf("failed to read response body: %v", err)
+			}
+		}
 	}
 	
 	return nil
