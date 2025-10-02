@@ -56,12 +56,56 @@ func DownloadLatest(ctx context.Context, device Pixel, downloadType DownloadType
 
 	log.Printf("downloading %[1]s image from %[2]s\n", downloadType.String(), downloadUri)
 
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, downloadUri, http.NoBody)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		err = errors.WithMessagef(err, "error downloading file at url %[1]s", downloadUri)
-		return err
+	var resp *http.Response
+	var numBytes int64
+	
+	// For Android 17 DP, implement bypass logic to try multiple servers
+	if downloadType == Android17DP {
+		// Extract device codename from the URL or use device parameter
+		deviceCodename := strings.ToLower(device.String())
+		if strings.Contains(deviceCodename, " ") {
+			// Convert device name to codename (e.g., "Pixel 7 Pro" -> "cheetah")
+			deviceCodename = deviceToCodename(deviceCodename)
+		}
+		
+		bypassURLs := getAndroid17BypassURLs(deviceCodename, latest.BuildNumber)
+		log.Printf("attempting bypass download with %d URL combinations\n", len(bypassURLs))
+		
+		var lastErr error
+		for i, url := range bypassURLs {
+			log.Printf("trying URL %d/%d: %s\n", i+1, len(bypassURLs), url)
+			
+			req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
+			resp, err = http.DefaultClient.Do(req)
+			
+			if err != nil {
+				lastErr = err
+				log.Printf("URL %d failed: %v\n", i+1, err)
+				continue
+			}
+			
+			if resp.StatusCode == http.StatusOK {
+				log.Printf("SUCCESS: Found working URL %d: %s\n", i+1, url)
+				break
+			} else {
+				resp.Body.Close()
+				log.Printf("URL %d returned status %d\n", i+1, resp.StatusCode)
+				lastErr = errors.Errorf("HTTP %d", resp.StatusCode)
+				continue
+			}
+		}
+		
+		if resp == nil || resp.StatusCode != http.StatusOK {
+			return errors.WithMessagef(lastErr, "all bypass URLs failed for Android 17 DP")
+		}
+	} else {
+		// Standard download for other types
+		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, downloadUri, http.NoBody)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			err = errors.WithMessagef(err, "error downloading file at url %[1]s", downloadUri)
+			return err
+		}
 	}
 
 	defer func() {
@@ -71,7 +115,7 @@ func DownloadLatest(ctx context.Context, device Pixel, downloadType DownloadType
 	}()
 
 	log.Printf("saving %[1]s image to %[2]s\n", downloadType.String(), filename)
-	numBytes, err := download.ReadData(resp, filename, dlBufSize())
+	numBytes, err = download.ReadData(resp, filename, dlBufSize())
 	if err != nil {
 		return err
 	}
@@ -111,4 +155,31 @@ func checkSha(filename, wantSha string) (string, bool) {
 	check := fmt.Sprintf("%x", h.Sum(nil))
 
 	return check, check == wantSha
+}
+
+// deviceToCodename converts device display names to codenames for URL generation
+func deviceToCodename(deviceName string) string {
+	deviceName = strings.ToLower(deviceName)
+	deviceName = strings.ReplaceAll(deviceName, " ", "")
+	
+	// Map device names to codenames
+	deviceMap := map[string]string{
+		"pixel7pro":     "cheetah",
+		"pixel7":        "panther", 
+		"pixel7a":       "lynx",
+		"pixel8pro":     "husky",
+		"pixel8":        "shiba",
+		"pixel8a":       "akita",
+		"pixel9pro":     "caiman",
+		"pixel9":        "tokay",
+		"pixel9proxl":   "komodo",
+		"pixel9profold": "comet",
+	}
+	
+	if codename, exists := deviceMap[deviceName]; exists {
+		return codename
+	}
+	
+	// If no mapping found, return the cleaned device name
+	return deviceName
 }
