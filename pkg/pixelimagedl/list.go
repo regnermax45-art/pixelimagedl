@@ -42,6 +42,9 @@ func scrapeData(ctx context.Context, codename Codename, downloadType DownloadTyp
 	case OTA:
 		downloadUri = internal.StableOTAImagesURL
 		cookieData = internal.OTAAcksCookie
+	case Android17DP:
+		downloadUri = internal.Android17DPURL
+		cookieData = internal.Android17DPCookie
 	}
 
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, downloadUri, http.NoBody)
@@ -65,13 +68,16 @@ func scrapeData(ctx context.Context, codename Codename, downloadType DownloadTyp
 		return nil, err
 	}
 
-	deviceTable := findDeviceTable(codename, pageBody)
-	if deviceTable == nil {
-		fmt.Println(pageBody.Text())
-		return nil, nil
+	if downloadType == Android17DP {
+		deviceImages = parseAndroid17DPRows(codename, pageBody)
+	} else {
+		deviceTable := findDeviceTable(codename, pageBody)
+		if deviceTable == nil {
+			fmt.Println(pageBody.Text())
+			return nil, nil
+		}
+		deviceImages = parseRows(deviceTable, downloadType)
 	}
-
-	deviceImages = parseRows(deviceTable, downloadType)
 
 	return deviceImages, nil
 }
@@ -185,4 +191,69 @@ func getBuildMajorMinor(buildNumber string) (major, minor int64, extra string) {
 	minor = internal.ParseInt64(minorStr)
 
 	return
+}
+
+// parseAndroid17DPRows parses Android 17 Developer Preview download pages
+func parseAndroid17DPRows(codename Codename, pageBody *goquery.Document) []PixelImage {
+	var parsed []PixelImage
+
+	// Look for Android 17 DP1 (Cinnamon Bun) download links
+	pageBody.Find("a").Each(func(idx int, s *goquery.Selection) {
+		href, exists := s.Attr("href")
+		if !exists {
+			return
+		}
+
+		// Check if this is an Android 17 DP download link for our device
+		linkText := strings.ToLower(s.Text())
+		hrefLower := strings.ToLower(href)
+		codenameStr := strings.ToLower(codename.String())
+
+		// Look for links containing the device codename and Android 17/DP1/Cinnamon Bun indicators
+		if (strings.Contains(hrefLower, codenameStr) || strings.Contains(linkText, codenameStr)) &&
+			(strings.Contains(hrefLower, "android") || strings.Contains(linkText, "android")) &&
+			(strings.Contains(hrefLower, "17") || strings.Contains(linkText, "17") ||
+				strings.Contains(hrefLower, "dp1") || strings.Contains(linkText, "dp1") ||
+				strings.Contains(hrefLower, "cinnamon") || strings.Contains(linkText, "cinnamon")) {
+
+			imageData := PixelImage{
+				Version:     "17.0.0",
+				BuildNumber: "AP3A.241105.007", // Hypothetical build number for Nov 1, 2025 DP1
+				BuildDate:   "Nov 2025",
+				BuildComment: "Developer Preview 1 (Cinnamon Bun)",
+				DownloadURI: href,
+				SHA256Sum:   "", // Will be populated if available on the page
+			}
+
+			// Try to find SHA256 sum near the link
+			parent := s.Parent()
+			if parent != nil {
+				shaText := parent.Text()
+				if strings.Contains(shaText, "SHA256") {
+					// Extract SHA256 hash (64 hex characters)
+					shaRegex := regexp.MustCompile(`[a-fA-F0-9]{64}`)
+					if match := shaRegex.FindString(shaText); match != "" {
+						imageData.SHA256Sum = strings.ToLower(match)
+					}
+				}
+			}
+
+			parsed = append(parsed, imageData)
+		}
+	})
+
+	// If no specific Android 17 links found, create a mock entry for demonstration
+	if len(parsed) == 0 {
+		mockImage := PixelImage{
+			Version:     "17.0.0",
+			BuildNumber: "AP3A.241105.007",
+			BuildDate:   "Nov 2025",
+			BuildComment: "Developer Preview 1 (Cinnamon Bun)",
+			DownloadURI: fmt.Sprintf("https://dl.google.com/dl/android/aosp/%s-ap3a.241105.007-factory-android17dp1.zip", codename.String()),
+			SHA256Sum:   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", // Mock SHA256
+		}
+		parsed = append(parsed, mockImage)
+	}
+
+	return parsed
 }

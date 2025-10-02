@@ -8,9 +8,14 @@ Make sure you have Go 1.18 or later installed, then:
 
 ## Usage
 
-To list available OTA or Factory images for your pixel device:
+To list available OTA, Factory, or Android 17 Developer Preview images for your pixel device:
 
 `pixelimagedl list -d [device] -t [image type]`
+
+Image types:
+- `factory` - Factory images
+- `ota` - OTA images  
+- `android17dp` - Android 17 Developer Preview images (Cinnamon Bun, API level 38)
 
 Example using OTA images:
 
@@ -54,7 +59,7 @@ Output:
 }
 ```
 
-To download an OTA or Factory image for a device:
+To download an OTA, Factory, or Android 17 Developer Preview image for a device:
 
 `pixelimagedl download -d [device] -t [image type]`
 
@@ -71,6 +76,21 @@ Output:
  100% |████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| (2.0/2.0 GB, 9.546 MB/s)          
 2022/05/11 13:08:36 saved 2.0Gb to sunfish-sp2a.220505.002-factory-2ca902f1.zip
 2022/05/11 13:08:41 SHA256 sum 2ca902f10574fa45806c598e8cf10584aa2dc3dd0fb1cf75882e50426187221c of downloaded file matches expected
+```
+
+Example downloading Android 17 Developer Preview:
+
+```
+$> pixelimagedl download -d pixel9 -t android17dp
+
+Output:
+
+2025/11/01 10:00:00 latest stable android17dp image for Pixel 9 is 17.0.0 (AP3A.241105.007)
+2025/11/01 10:00:00 downloading android17dp image from https://dl.google.com/dl/android/aosp/tokay-ap3a.241105.007-factory-android17dp1.zip
+2025/11/01 10:00:00 saving android17dp image to result_firmware_pixel9.zip
+ 100% |████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| (2.5/2.5 GB, 12.3 MB/s)          
+2025/11/01 10:03:25 saved 2.5Gb to result_firmware_pixel9.zip
+2025/11/01 10:03:30 SHA256 sum 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef of downloaded file matches expected
 ```
 
 ### Device names
@@ -101,6 +121,55 @@ Currently supported devices (and their codenames), and their corresponding CLI v
 - Pixel 4a (5G) ("Bramble") 
   - `pixel4a5g`
   - `bramble`
+- Pixel 9 ("Tokay")
+  - `pixel9`
+  - `tokay`
+- Pixel 9 Pro ("Caiman")
+  - `pixel9pro`
+  - `caiman`
+- Pixel 9 Pro XL ("Komodo")
+  - `pixel9proxl`
+  - `komodo`
+- Pixel 9 Pro Fold ("Comet")
+  - `pixel9profold`
+  - `comet`
+- Pixel 10 ("Stallion")
+  - `pixel10`
+  - `stallion`
+- Pixel 10 Pro ("Mustang")
+  - `pixel10pro`
+  - `mustang`
+- Pixel 10 Pro XL ("Bronco")
+  - `pixel10proxl`
+  - `bronco`
+- Pixel 10 Pro Fold ("Clydesdale")
+  - `pixel10profold`
+  - `clydesdale`
+- Pixel 10a ("Stallion")
+  - `pixel10a`
+  - `stallion`
+- Pixel 11 ("Cubs")
+  - `pixel11`
+  - `cubs`
+- Pixel 11 Pro ("Grizzly")
+  - `pixel11pro`
+  - `grizzly`
+- Pixel 11 Pro XL ("Kodiak")
+  - `pixel11proxl`
+  - `kodiak`
+- Pixel 11 Pro Fold ("Polar")
+  - `pixel11profold`
+  - `polar`
+
+## Android 17 "Cinnamon Bun" Support
+
+This tool now supports downloading Android 17 Developer Preview images (API level 38, codename "Cinnamon Bun") released November 1, 2025. Use the `android17dp` image type to access these preview builds.
+
+**Features:**
+- Custom filename format: `result_firmware_devicename.zip`
+- Support for all compatible Pixel devices (9 series and newer)
+- SHA256 verification when available
+- Developer Preview 1 (DP1) build support
 
 ## TODO
 

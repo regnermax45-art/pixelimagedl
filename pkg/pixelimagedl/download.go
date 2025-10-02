@@ -37,7 +37,15 @@ func DownloadLatest(ctx context.Context, device Pixel, downloadType DownloadType
 	downloadUri := latest.DownloadURI
 	split := strings.Split(downloadUri, "/")
 
-	filename = internal.SliceLast(split)
+	// Use custom filename format for Android 17 DP: result_firmware_devicename.zip
+	if downloadType == Android17DP {
+		deviceName := strings.ToLower(device.String())
+		deviceName = strings.ReplaceAll(deviceName, " ", "")
+		filename = fmt.Sprintf("result_firmware_%s.zip", deviceName)
+	} else {
+		filename = internal.SliceLast(split)
+	}
+	
 	if !filepath.IsAbs(outDir) {
 		outDir, err = filepath.Abs(outDir)
 		if err != nil {

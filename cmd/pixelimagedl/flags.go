@@ -14,7 +14,7 @@ import (
 var (
 	downloadTypeFlag = cli.StringFlag{
 		Name:     "imagetype",
-		Usage:    "`type` of image zip to download (factory or ota)",
+		Usage:    "`type` of image zip to download (factory, ota, or android17dp)",
 		Aliases:  []string{"t", "type"},
 		Required: false,
 		Value:    pixelimagedl.Factory.String(),
