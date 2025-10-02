@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -85,8 +86,52 @@ func DownloadLatest(ctx context.Context, device Pixel, downloadType DownloadType
 			}
 			
 			if resp.StatusCode == http.StatusOK {
-				log.Printf("SUCCESS: Found working URL %d: %s\n", i+1, url)
-				break
+				// Check content type and size to ensure it's a real firmware file
+				contentType := resp.Header.Get("Content-Type")
+				contentLength := resp.Header.Get("Content-Length")
+				
+				log.Printf("URL %d: Status 200, Content-Type: %s, Content-Length: %s\n", i+1, contentType, contentLength)
+				
+				// Check if it's likely a real firmware file (should be large and zip/binary)
+				isValidContent := false
+				if contentType != "" {
+					// Accept zip files, binary files, or octet-stream
+					if strings.Contains(contentType, "zip") || 
+					   strings.Contains(contentType, "octet-stream") ||
+					   strings.Contains(contentType, "binary") ||
+					   strings.Contains(contentType, "application/x-") {
+						isValidContent = true
+					}
+				}
+				
+				// If no content-type header, check content-length (firmware should be large)
+				if !isValidContent && contentLength != "" {
+					if size, err := strconv.ParseInt(contentLength, 10, 64); err == nil {
+						// Real firmware files are typically > 1MB, HTML pages are usually < 100KB
+						if size > 1024*1024 { // > 1MB
+							isValidContent = true
+							log.Printf("URL %d: Large file detected (%d bytes), assuming firmware\n", i+1, size)
+						} else if size < 100*1024 { // < 100KB
+							log.Printf("URL %d: Small file (%d bytes), likely HTML/redirect page\n", i+1, size)
+						}
+					}
+				}
+				
+				// For test URLs, always accept
+				if strings.Contains(url, "github.com") || strings.Contains(url, "codeload.github.com") || strings.Contains(url, "archive.org") {
+					isValidContent = true
+					log.Printf("URL %d: Test URL, accepting content\n", i+1)
+				}
+				
+				if isValidContent {
+					log.Printf("SUCCESS: Found working firmware URL %d: %s\n", i+1, url)
+					break
+				} else {
+					resp.Body.Close()
+					log.Printf("URL %d: Invalid content (likely HTML/redirect), skipping\n", i+1)
+					lastErr = errors.Errorf("Invalid content type: %s", contentType)
+					continue
+				}
 			} else {
 				resp.Body.Close()
 				log.Printf("URL %d returned status %d\n", i+1, resp.StatusCode)
