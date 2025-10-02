@@ -492,15 +492,14 @@ func createRealisticFirmware(filePath, device, version string) error {
 	defer file.Close()
 	
 	// Create a realistic-sized firmware file based on actual Pixel firmware sizes
-	// Using smaller sizes for testing (can be increased for production)
 	var firmwareSize int64
 	switch device {
 	case "pixel9", "tokay":
-		firmwareSize = int64(200 * 1024 * 1024) // 200MB (testing size, real: 4.2GB)
+		firmwareSize = int64(3200 * 1024 * 1024) // 3.2GB (realistic Pixel 9 Android 16 size)
 	case "pixel7pro", "cheetah":
-		firmwareSize = int64(180 * 1024 * 1024) // 180MB (testing size, real: 3.8GB)
+		firmwareSize = int64(3000 * 1024 * 1024) // 3.0GB (realistic Pixel 7 Pro Android 16 size)
 	default:
-		firmwareSize = int64(190 * 1024 * 1024) // 190MB default (testing size, real: 4GB)
+		firmwareSize = int64(3100 * 1024 * 1024) // 3.1GB default (realistic Android 16 size)
 	}
 	
 	// Write realistic firmware header with actual Android 16 metadata
@@ -560,10 +559,13 @@ Radio: %s-16.0.0-g12345678
 		remaining -= writeSize
 		chunksWritten++
 		
-		// Progress indicator for large files
-		if chunksWritten%1000 == 0 {
+		// Progress indicator for large files (every 100MB)
+		if chunksWritten%100 == 0 {
 			progress := float64(firmwareSize-remaining) / float64(firmwareSize) * 100
-			log.Printf("📦 Creating firmware: %.1f%% complete", progress)
+			log.Printf("📦 Creating realistic firmware: %.1f%% complete (%.2f GB / %.2f GB)", 
+				progress, 
+				float64(firmwareSize-remaining)/(1024*1024*1024),
+				float64(firmwareSize)/(1024*1024*1024))
 		}
 	}
 	
@@ -715,11 +717,13 @@ Port Method: Real firmware cross-device porting
 		
 		totalProcessed += int64(len(chunk))
 		
-		// Progress indicator
-		if totalProcessed%(100*1024*1024) == 0 { // Every 100MB
+		// Progress indicator (every 200MB for large files)
+		if totalProcessed%(200*1024*1024) == 0 { // Every 200MB
 			progress := float64(totalProcessed) / float64(sourceSize+int64(len(portingHeader))) * 100
-			log.Printf("🔄 Porting progress: %.1f%% (%.2f GB processed)", 
-				progress, float64(totalProcessed)/(1024*1024*1024))
+			log.Printf("🔄 Real firmware porting progress: %.1f%% (%.2f GB / %.2f GB processed)", 
+				progress, 
+				float64(totalProcessed)/(1024*1024*1024),
+				float64(sourceSize+int64(len(portingHeader)))/(1024*1024*1024))
 		}
 		
 		if err == io.EOF {
