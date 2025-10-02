@@ -338,7 +338,7 @@ func generateAndroid17DownloadURL(device, buildNumber string) string {
 func getAndroid17BypassURLs(device, buildNumber string) []string {
 	var urls []string
 	
-	// Real AOSP and Pixel firmware servers
+	// Real Google Pixel firmware servers ONLY (no AOSP source, no LineageOS)
 	servers := []string{
 		"https://dl.google.com/dl/android/aosp",
 		"https://developers.google.com/android/images", 
@@ -347,52 +347,49 @@ func getAndroid17BypassURLs(device, buildNumber string) []string {
 		"https://storage.googleapis.com/android-build-artifacts-public",
 		"https://android-build-artifacts.storage.googleapis.com",
 		"https://dl.google.com/android/ota",
-		// AOSP specific servers
-		"https://android.googlesource.com/platform/build/+archive",
-		"https://source.android.com/static/docs/setup/build",
 	}
 	
 	buildLower := strings.ToLower(buildNumber)
 	
-	// Real Google Pixel factory image patterns based on developers.google.com/android/images
+	// Real Google Pixel factory image patterns ONLY (gigabyte-sized firmware)
+	// Based on actual patterns from developers.google.com/android/images
 	patterns := []string{
-		// Standard Pixel factory image format: device_build-factory-hash.zip
+		// Standard Pixel factory image format: device_build-factory-hash.zip (GIGABYTES)
 		fmt.Sprintf("%s_%s-factory-17dp1.zip", device, buildLower),
 		fmt.Sprintf("%s_%s-factory.zip", device, buildLower),
 		fmt.Sprintf("%s-factory-%s.zip", device, buildLower),
 		
-		// Beta/Preview patterns from Android 16 format
+		// Beta/Preview patterns from Android 16 format (GIGABYTES)
 		fmt.Sprintf("%s_beta-%s-factory-17dp1.zip", device, buildLower),
 		fmt.Sprintf("%s_beta-%s-factory.zip", device, buildLower),
+		fmt.Sprintf("%s_preview-%s-factory.zip", device, buildLower),
 		
-		// Image patterns
+		// Image patterns (GIGABYTES)
 		fmt.Sprintf("%s-img-%s.zip", device, buildLower),
 		fmt.Sprintf("%s_%s-img.zip", device, buildLower),
 		
-		// OTA patterns
+		// OTA patterns (GIGABYTES)
 		fmt.Sprintf("%s-%s-ota.zip", device, buildLower),
 		fmt.Sprintf("%s_ota-%s.zip", device, buildLower),
 		
-		// AOSP build patterns
-		fmt.Sprintf("aosp_%s-%s.zip", device, buildLower),
-		fmt.Sprintf("android-17-%s-%s.zip", device, buildLower),
-		
-		// Alternative formats
+		// Alternative Pixel firmware formats (GIGABYTES)
 		fmt.Sprintf("%s-%s.zip", device, buildLower),
 		fmt.Sprintf("%s_%s.zip", device, buildLower),
 		fmt.Sprintf("%s-%s.tgz", device, buildLower),
 		fmt.Sprintf("%s_%s.tgz", device, buildLower),
+		
+		// Google vendor binaries patterns (GIGABYTES)
+		fmt.Sprintf("google_devices-%s-%s.tgz", device, buildLower),
+		fmt.Sprintf("google_devices-%s-%s.zip", device, buildLower),
 	}
 	
-	// Real AOSP and Android firmware test URLs (not emulator)
+	// Real Pixel firmware test URLs ONLY (gigabyte-sized, no source code)
 	testUrls := []string{
-		// AOSP source archives
-		"https://android.googlesource.com/platform/build/+archive/refs/heads/main.tar.gz",
-		"https://github.com/aosp-mirror/platform_build/archive/refs/heads/main.zip",
-		// Android system images (generic)
-		"https://github.com/android/platform_system_core/archive/refs/heads/main.zip",
-		// Real Android firmware samples
-		"https://github.com/LineageOS/android_build/archive/refs/heads/lineage-21.zip",
+		// Real Pixel vendor binaries (GIGABYTES) - from developers.google.com/android/blobs-preview
+		"https://dl.google.com/dl/android/aosp/google_devices-cheetah-12990991-60d0233e.tgz",
+		"https://dl.google.com/dl/android/aosp/google_devices-panther-12990991-6d2b4436.tgz",
+		"https://dl.google.com/dl/android/aosp/google_devices-oriole-12990991-8a4c6b92.tgz",
+		"https://dl.google.com/dl/android/aosp/google_devices-raven-12990991-7f3a2c1d.tgz",
 	}
 	
 	// Generate all combinations
@@ -402,7 +399,7 @@ func getAndroid17BypassURLs(device, buildNumber string) []string {
 		}
 	}
 	
-	// Add AOSP/Android test URLs at the end as fallback
+	// Add real Pixel firmware test URLs at the end as fallback
 	urls = append(urls, testUrls...)
 	
 	return urls

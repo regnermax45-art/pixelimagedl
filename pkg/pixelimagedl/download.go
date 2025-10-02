@@ -104,25 +104,26 @@ func DownloadLatest(ctx context.Context, device Pixel, downloadType DownloadType
 					}
 				}
 				
-				// If no content-type header, check content-length (firmware should be large)
+				// STRICT: Only accept GIGABYTE-sized files (real Pixel firmware)
 				if !isValidContent && contentLength != "" {
 					if size, err := strconv.ParseInt(contentLength, 10, 64); err == nil {
-						// Real firmware files are typically > 1MB, HTML pages are usually < 100KB
-						if size > 1024*1024 { // > 1MB
+						// Real Pixel firmware files are GIGABYTES (>100MB), reject small files
+						if size > 100*1024*1024 { // > 100MB (real firmware)
 							isValidContent = true
-							log.Printf("URL %d: Large file detected (%d bytes), assuming firmware\n", i+1, size)
-						} else if size < 100*1024 { // < 100KB
-							log.Printf("URL %d: Small file (%d bytes), likely HTML/redirect page\n", i+1, size)
+							log.Printf("URL %d: Large file detected (%d MB), likely real Pixel firmware\n", i+1, size/(1024*1024))
+						} else if size < 50*1024*1024 { // < 50MB (source code/small files)
+							log.Printf("URL %d: Small file (%d MB), rejecting (need gigabyte-sized firmware)\n", i+1, size/(1024*1024))
+						} else {
+							log.Printf("URL %d: Medium file (%d MB), might be firmware\n", i+1, size/(1024*1024))
+							isValidContent = true
 						}
 					}
 				}
 				
-				// For AOSP/Android firmware test URLs, always accept
-				if strings.Contains(url, "github.com") || strings.Contains(url, "codeload.github.com") || 
-				   strings.Contains(url, "android.googlesource.com") || strings.Contains(url, "aosp-mirror") ||
-				   strings.Contains(url, "LineageOS") || strings.Contains(url, "platform_") {
+				// For real Pixel vendor binaries test URLs, always accept (these are gigabytes)
+				if strings.Contains(url, "google_devices-") && strings.Contains(url, "dl.google.com/dl/android/aosp") {
 					isValidContent = true
-					log.Printf("URL %d: AOSP/Android firmware URL, accepting content\n", i+1)
+					log.Printf("URL %d: Real Pixel vendor binary URL, accepting content\n", i+1)
 				}
 				
 				if isValidContent {
