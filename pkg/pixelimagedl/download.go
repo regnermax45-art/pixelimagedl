@@ -78,11 +78,16 @@ func DownloadLatest(ctx context.Context, device Pixel, downloadType DownloadType
 
 	log.Printf("saved %-.1[1]fGb to %[2]s", download.GbFromBytes(numBytes), filename)
 
-	gotSha, shaMatch := checkSha(filename, latest.SHA256Sum)
-	if !shaMatch {
-		return errors.Errorf("SHA256 mismatch; expected %[1]s, sum of downloaded file is %[2]s", latest.SHA256Sum, gotSha)
+	// Perform SHA256 verification if hash is available
+	if latest.SHA256Sum != "" {
+		gotSha, shaMatch := checkSha(filename, latest.SHA256Sum)
+		if !shaMatch {
+			return errors.Errorf("SHA256 mismatch; expected %[1]s, sum of downloaded file is %[2]s", latest.SHA256Sum, gotSha)
+		} else {
+			log.Printf("SHA256 sum %[1]s of downloaded file matches expected\n", gotSha)
+		}
 	} else {
-		log.Printf("SHA256 sum %[1]s of downloaded file matches expected\n", gotSha)
+		log.Printf("SHA256 verification skipped (no hash available from source)\n")
 	}
 
 	return nil

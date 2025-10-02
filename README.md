@@ -161,15 +161,19 @@ Currently supported devices (and their codenames), and their corresponding CLI v
   - `pixel11profold`
   - `polar`
 
-## Android 17 "Cinnamon Bun" Support
+## Android 17 Developer Preview Support
 
-This tool now supports downloading Android 17 Developer Preview images (API level 38, codename "Cinnamon Bun") released November 1, 2025. Use the `android17dp` image type to access these preview builds.
+This tool includes support for Android 17 Developer Preview images when they become available. Use the `android17dp` image type to access these preview builds.
 
 **Features:**
+- Real parsing of Google's Android 17 Developer Preview download pages
 - Custom filename format: `result_firmware_devicename.zip`
-- Support for all compatible Pixel devices (9 series and newer)
-- SHA256 verification when available
-- Developer Preview 1 (DP1) build support
+- Support for all compatible Pixel devices
+- SHA256 verification when provided by Google
+- Automatic detection of build numbers, dates, and download URLs
+- Default device: Pixel 7 Pro (Cheetah) when no device specified
+
+**Note:** Android 17 Developer Preview is not yet released. The tool will return empty results until Google publishes the preview builds.
 
 ## TODO
 

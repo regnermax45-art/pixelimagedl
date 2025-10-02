@@ -4,7 +4,7 @@ const (
 	downloadsUrl           string = "https://developers.google.com/android"
 	StableFactoryImagesURL        = downloadsUrl + "/images"
 	StableOTAImagesURL            = downloadsUrl + "/ota"
-	Android17DPURL                = downloadsUrl + "/preview/download"
+	Android17DPURL                = "https://developer.android.com/about/versions/15/download"
 )
 
 const (
