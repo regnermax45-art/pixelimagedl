@@ -30,11 +30,20 @@ func _() {
 	_ = x[Pixel9Pro-19]
 	_ = x[Pixel9ProXL-20]
 	_ = x[Pixel9ProFold-21]
+	_ = x[Pixel10-22]
+	_ = x[Pixel10Pro-23]
+	_ = x[Pixel10ProXL-24]
+	_ = x[Pixel10ProFold-25]
+	_ = x[Pixel10a-26]
+	_ = x[Pixel11-27]
+	_ = x[Pixel11Pro-28]
+	_ = x[Pixel11ProXL-29]
+	_ = x[Pixel11ProFold-30]
 }
 
-const _Pixel_name = "unknownPixel 4Pixel 4 XLPixel 4aPixel 4a 5GPixel 5Pixel 5aPixel 6Pixel 6 ProPixel 6aPixel 7Pixel 7 ProPixel 7aPixel TabletPixel FoldPixel 8Pixel 8 ProPixel 8aPixel 9Pixel 9 ProPixel 9 Pro XLPixel 9 Pro Fold"
+const _Pixel_name = "unknownPixel 4Pixel 4 XLPixel 4aPixel 4a 5GPixel 5Pixel 5aPixel 6Pixel 6 ProPixel 6aPixel 7Pixel 7 ProPixel 7aPixel TabletPixel FoldPixel 8Pixel 8 ProPixel 8aPixel 9Pixel 9 ProPixel 9 Pro XLPixel 9 Pro FoldPixel 10Pixel 10 ProPixel 10 Pro XLPixel 10 Pro FoldPixel 10aPixel 11Pixel 11 ProPixel 11 Pro XLPixel 11 Pro Fold"
 
-var _Pixel_index = [...]uint8{0, 7, 14, 24, 32, 43, 50, 58, 65, 76, 84, 91, 102, 110, 122, 132, 139, 150, 158, 165, 176, 190, 206}
+var _Pixel_index = [...]uint16{0, 7, 14, 24, 32, 43, 50, 58, 65, 76, 84, 91, 102, 110, 122, 132, 139, 150, 158, 165, 176, 190, 206, 214, 226, 241, 258, 267, 275, 287, 302, 319}
 
 func (i Pixel) String() string {
 	if i >= Pixel(len(_Pixel_index)-1) {
@@ -68,11 +77,19 @@ func _() {
 	_ = x[Caiman-19]
 	_ = x[Komodo-20]
 	_ = x[Comet-21]
+	_ = x[Stallion-22]
+	_ = x[Mustang-23]
+	_ = x[Bronco-24]
+	_ = x[Clydesdale-25]
+	_ = x[Cubs-26]
+	_ = x[Grizzly-27]
+	_ = x[Kodiak-28]
+	_ = x[Polar-29]
 }
 
-const _Codename_name = "unknownflamecoralsunfishbrambleredfinbarbetorioleravenbluejaypanthercheetahlynxtangorprofelixshibahuskyakitatokaycaimankomodocomet"
+const _Codename_name = "unknownflamecoralsunfishbrambleredfinbarbetorioleravenbluejaypanthercheetahlynxtangorprofelixshibahuskyakitatokaycaimankomodocometstallionmustangbroncoclydesdalecubsgrizzlykodiakpolar"
 
-var _Codename_index = [...]uint8{0, 7, 12, 17, 24, 31, 37, 43, 49, 54, 61, 68, 75, 79, 88, 93, 98, 103, 108, 113, 119, 125, 130}
+var _Codename_index = [...]uint8{0, 7, 12, 17, 24, 31, 37, 43, 49, 54, 61, 68, 75, 79, 88, 93, 98, 103, 108, 113, 119, 125, 130, 138, 145, 151, 161, 165, 172, 178, 183}
 
 func (i Codename) String() string {
 	if i >= Codename(len(_Codename_index)-1) {
@@ -86,11 +103,12 @@ func _() {
 	var x [1]struct{}
 	_ = x[Factory-0]
 	_ = x[OTA-1]
+	_ = x[Android17DP-2]
 }
 
-const _DownloadType_name = "factoryOTA"
+const _DownloadType_name = "factoryOTAandroid17dp"
 
-var _DownloadType_index = [...]uint8{0, 7, 10}
+var _DownloadType_index = [...]uint8{0, 7, 10, 21}
 
 func (i DownloadType) String() string {
 	if i >= DownloadType(len(_DownloadType_index)-1) {

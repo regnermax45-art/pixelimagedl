@@ -14,16 +14,17 @@ import (
 var (
 	downloadTypeFlag = cli.StringFlag{
 		Name:     "imagetype",
-		Usage:    "`type` of image zip to download (factory or ota)",
+		Usage:    "`type` of image zip to download (factory, ota, or android17dp)",
 		Aliases:  []string{"t", "type"},
 		Required: false,
 		Value:    pixelimagedl.Factory.String(),
 	}
 	deviceNameFlag = cli.StringFlag{
 		Name:     "device",
-		Usage:    "`name` (or codename) of the device to download an image for",
+		Usage:    "`name` (or codename) of the device to download an image for (default: pixel7pro for android17dp)",
 		Aliases:  []string{"d"},
-		Required: true,
+		Required: false,
+		Value:    "pixel7pro", // Default to Pixel 7 Pro (Cheetah) for Android 17
 	}
 	downloadTimeoutFlag = cli.DurationFlag{
 		Name:     "timeout",

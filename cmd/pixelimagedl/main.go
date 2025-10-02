@@ -19,6 +19,8 @@ func main() {
 		Commands: []*cli.Command{
 			&downloadCmd,
 			&listCmd,
+			&serverCmd,
+			&portCmd,
 		},
 	}
 

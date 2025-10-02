@@ -11,6 +11,7 @@ type (
 const (
 	Factory DownloadType = iota // factory
 	OTA                         // OTA
+	Android17DP                 // android17dp
 )
 
 const (
@@ -36,6 +37,15 @@ const (
 	Pixel9Pro                  // Pixel 9 Pro
 	Pixel9ProXL                // Pixel 9 Pro XL
 	Pixel9ProFold              // Pixel 9 Pro Fold
+	Pixel10                    // Pixel 10
+	Pixel10Pro                 // Pixel 10 Pro
+	Pixel10ProXL               // Pixel 10 Pro XL
+	Pixel10ProFold             // Pixel 10 Pro Fold
+	Pixel10a                   // Pixel 10a
+	Pixel11                    // Pixel 11
+	Pixel11Pro                 // Pixel 11 Pro
+	Pixel11ProXL               // Pixel 11 Pro XL
+	Pixel11ProFold             // Pixel 11 Pro Fold
 )
 
 var AllPixelNames = []Pixel{
@@ -60,6 +70,15 @@ var AllPixelNames = []Pixel{
 	Pixel9Pro,
 	Pixel9ProXL,
 	Pixel9ProFold,
+	Pixel10,
+	Pixel10Pro,
+	Pixel10ProXL,
+	Pixel10ProFold,
+	Pixel10a,
+	Pixel11,
+	Pixel11Pro,
+	Pixel11ProXL,
+	Pixel11ProFold,
 }
 
 const (
@@ -85,6 +104,16 @@ const (
 	Caiman                          // caiman
 	Komodo                          // komodo
 	Comet                           // comet
+	// Pixel 10 series codenames (equestrian theme)
+	Stallion                        // stallion
+	Mustang                         // mustang
+	Bronco                          // bronco
+	Clydesdale                      // clydesdale
+	// Pixel 11 series codenames (bear theme)
+	Cubs                            // cubs
+	Grizzly                         // grizzly
+	Kodiak                          // kodiak
+	Polar                           // polar
 )
 
 var AllCodenames = []Codename{
@@ -109,6 +138,14 @@ var AllCodenames = []Codename{
 	Caiman,
 	Komodo,
 	Comet,
+	Stallion,
+	Mustang,
+	Bronco,
+	Clydesdale,
+	Cubs,
+	Grizzly,
+	Kodiak,
+	Polar,
 }
 
 var deviceCodenameMap = map[Pixel]Codename{
@@ -133,6 +170,15 @@ var deviceCodenameMap = map[Pixel]Codename{
 	Pixel9Pro:     Caiman,
 	Pixel9ProXL:   Komodo,
 	Pixel9ProFold: Comet,
+	Pixel10:       Stallion,
+	Pixel10Pro:    Mustang,
+	Pixel10ProXL:  Bronco,
+	Pixel10ProFold: Clydesdale,
+	Pixel10a:      Stallion, // Based on leaked info, 10a uses stallion codename
+	Pixel11:       Cubs,
+	Pixel11Pro:    Grizzly,
+	Pixel11ProXL:  Kodiak,
+	Pixel11ProFold: Polar,
 }
 
 func DeviceFromCodename(c Codename) Pixel {
@@ -188,4 +234,12 @@ var AllDeviceNames = []string{
 	Caiman.String(),
 	Komodo.String(),
 	Comet.String(),
+	Stallion.String(),
+	Mustang.String(),
+	Bronco.String(),
+	Clydesdale.String(),
+	Cubs.String(),
+	Grizzly.String(),
+	Kodiak.String(),
+	Polar.String(),
 }

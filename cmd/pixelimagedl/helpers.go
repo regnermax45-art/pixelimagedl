@@ -49,10 +49,10 @@ func checkFlagVal[T fmt.Stringer](allowedVals []T, check string) (T, bool) {
 }
 
 var (
-	allDownloadTypes     = []pixelimagedl.DownloadType{pixelimagedl.Factory, pixelimagedl.OTA}
+	allDownloadTypes     = []pixelimagedl.DownloadType{pixelimagedl.Factory, pixelimagedl.OTA, pixelimagedl.Android17DP}
 	allowedDeviceNames   = internal.Map(pixelimagedl.AllDeviceNames, makeCliFlagVal)
 	allowedDownloadTypes = internal.Map(
-		[]string{pixelimagedl.Factory.String(), pixelimagedl.OTA.String()},
+		[]string{pixelimagedl.Factory.String(), pixelimagedl.OTA.String(), pixelimagedl.Android17DP.String()},
 		makeCliFlagVal,
 	)
 )
