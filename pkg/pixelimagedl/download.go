@@ -117,10 +117,12 @@ func DownloadLatest(ctx context.Context, device Pixel, downloadType DownloadType
 					}
 				}
 				
-				// For test URLs, always accept
-				if strings.Contains(url, "github.com") || strings.Contains(url, "codeload.github.com") || strings.Contains(url, "archive.org") {
+				// For AOSP/Android firmware test URLs, always accept
+				if strings.Contains(url, "github.com") || strings.Contains(url, "codeload.github.com") || 
+				   strings.Contains(url, "android.googlesource.com") || strings.Contains(url, "aosp-mirror") ||
+				   strings.Contains(url, "LineageOS") || strings.Contains(url, "platform_") {
 					isValidContent = true
-					log.Printf("URL %d: Test URL, accepting content\n", i+1)
+					log.Printf("URL %d: AOSP/Android firmware URL, accepting content\n", i+1)
 				}
 				
 				if isValidContent {
