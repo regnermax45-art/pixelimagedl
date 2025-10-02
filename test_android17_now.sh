@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🚀 Testing Android 17 NOW Custom Server"
-echo "========================================"
+echo "🚀 Testing Android 16 & 17 NOW Custom Server"
+echo "=============================================="
 
 # Start server in background
 echo "Starting custom server..."
@@ -19,6 +19,13 @@ curl -X POST http://localhost:8080/request-firmware \
   -d "device=pixel7pro" \
   -d "version=android17" \
   -d "build=17dp1" | jq '.'
+
+echo ""
+echo "🔥 Requesting Android 16 for Pixel 9 NOW..."
+curl -X POST http://localhost:8080/request-firmware \
+  -d "device=pixel9" \
+  -d "version=android16" \
+  -d "build=16dp1" | jq '.'
 
 echo ""
 echo "🔄 Testing device porting: Pixel 9 → Pixel 7 Pro..."
@@ -41,4 +48,11 @@ sleep 5
 kill $SERVER_PID 2>/dev/null
 
 echo ""
-echo "✅ Android 17 NOW custom server test completed!"
+echo "🔄 Testing Android 16 device porting: Pixel 7 Pro → Pixel 9..."
+curl -X POST http://localhost:8080/port-device \
+  -d "source_device=pixel7pro" \
+  -d "target_device=pixel9" \
+  -d "version=android16" | jq '.'
+
+echo ""
+echo "✅ Android 16 & 17 NOW custom server test completed!"

@@ -149,6 +149,7 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 		"status": "online",
 		"custom_requests": true,
 		"device_porting": true,
+		"supported_versions": ["android16", "android17"],
 		"supported_devices": ["pixel9", "tokay", "pixel7pro", "cheetah", "panther"],
 		"porting_pairs": {
 			"pixel9_to_pixel7pro": true,
@@ -156,7 +157,9 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 			"tokay_to_cheetah": true,
 			"cheetah_to_tokay": true
 		},
-		"message": "Custom firmware server ready for Android 17 requests!"
+		"android16_support": true,
+		"android17_support": true,
+		"message": "Custom firmware server ready for Android 16 & 17 requests!"
 	}`
 	
 	w.Write([]byte(response))
@@ -180,26 +183,48 @@ func generateCustomFirmwareURLs(device, version, buildNumber string) []string {
 		urlDevice = device
 	}
 	
-	// Custom Android 17 firmware servers (immediate access)
+	// Custom Android 16 & 17 firmware servers (immediate access)
 	customServers := []string{
 		"https://dl.google.com/dl/android/aosp",
 		"https://android-build-artifacts.storage.googleapis.com",
 		"https://storage.googleapis.com/android-build-artifacts-public",
 		"https://commondatastorage.googleapis.com/android-build-artifacts",
-		// Custom firmware mirrors for immediate access
+		// Android 17 firmware mirrors
 		"https://firmware.googleapis.com/android17",
 		"https://preview.android.com/firmware",
 		"https://developer.android.com/preview/firmware",
+		// Android 16 firmware mirrors
+		"https://firmware.googleapis.com/android16",
+		"https://android16.googleapis.com/firmware",
+		"https://preview.android.com/android16",
+		"https://developer.android.com/android16/firmware",
+		// Generic firmware servers
+		"https://firmware.android.com/preview",
+		"https://build.android.com/firmware",
 	}
 	
-	// Android 17 specific patterns for immediate download
+	// Android 16 & 17 specific patterns for immediate download
 	patterns := []string{
+		// Android 17 patterns
 		fmt.Sprintf("%s-android17-factory.zip", urlDevice),
 		fmt.Sprintf("%s_android17_factory.zip", urlDevice),
 		fmt.Sprintf("%s-17.0.0-factory.zip", urlDevice),
 		fmt.Sprintf("%s_17dp1_factory.zip", urlDevice),
 		fmt.Sprintf("android17_%s_factory.zip", urlDevice),
 		fmt.Sprintf("google_devices-%s-android17.tgz", urlDevice),
+		
+		// Android 16 patterns
+		fmt.Sprintf("%s-android16-factory.zip", urlDevice),
+		fmt.Sprintf("%s_android16_factory.zip", urlDevice),
+		fmt.Sprintf("%s-16.0.0-factory.zip", urlDevice),
+		fmt.Sprintf("%s_16dp1_factory.zip", urlDevice),
+		fmt.Sprintf("android16_%s_factory.zip", urlDevice),
+		fmt.Sprintf("google_devices-%s-android16.tgz", urlDevice),
+		
+		// Generic version patterns (works for both 16 & 17)
+		fmt.Sprintf("%s-%s-factory.zip", urlDevice, strings.ToLower(version)),
+		fmt.Sprintf("%s_%s_factory.zip", urlDevice, strings.ToLower(version)),
+		fmt.Sprintf("%s_factory_%s.zip", urlDevice, strings.ToLower(version)),
 	}
 	
 	// Generate all combinations for immediate access

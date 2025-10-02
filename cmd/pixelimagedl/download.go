@@ -28,6 +28,10 @@ var downloadCmd = cli.Command{
 			Name:  "android17-now",
 			Usage: "Force Android 17 download NOW (custom server mode)",
 		},
+		&cli.BoolFlag{
+			Name:  "android16-now",
+			Usage: "Force Android 16 download NOW (custom server mode)",
+		},
 	},
 	Action: WithFlags(downloadCmdAction),
 }

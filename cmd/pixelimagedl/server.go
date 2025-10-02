@@ -10,12 +10,12 @@ import (
 
 var serverCmd = cli.Command{
 	Name:  "server",
-	Usage: "Start custom firmware server for Android 17 NOW + device porting",
+	Usage: "Start custom firmware server for Android 16 & 17 NOW + device porting",
 	Description: `Start a custom server that allows:
-- Manual Android 17 firmware requests
+- Manual Android 16 & 17 firmware requests
 - Cross-device porting between Pixel 9 and Pixel 7 Pro
 - Real-time firmware downloads
-- Custom firmware URL generation`,
+- Custom firmware URL generation for both versions`,
 	Flags: []cli.Flag{
 		&cli.IntFlag{
 			Name:  "port",
@@ -45,7 +45,7 @@ var serverCmd = cli.Command{
 		log.Printf("📱 Custom requests: %v", config.EnableCustomRequests)
 		log.Printf("🔄 Device porting: %v", config.EnableDevicePorting)
 		log.Printf("🌐 Port: %d", config.ServerPort)
-		log.Printf("🔥 Ready for Android 17 NOW!")
+		log.Printf("🔥 Ready for Android 16 & 17 NOW!")
 
 		return pixelimagedl.StartCustomServer(config)
 	},
