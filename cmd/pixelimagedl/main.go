@@ -20,6 +20,7 @@ func main() {
 			&downloadCmd,
 			&listCmd,
 			&serverCmd,
+			&portCmd,
 		},
 	}
 
