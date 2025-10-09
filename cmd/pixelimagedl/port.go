@@ -18,6 +18,7 @@ var portCmd = cli.Command{
 		&downloadTimeoutFlag,
 		&outDirFlag,
 		&portingAlgorithmFlag,
+		&streamingFlag,
 	},
 	Action: WithFlags(portCmdAction),
 }

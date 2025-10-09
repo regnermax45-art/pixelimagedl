@@ -37,25 +37,31 @@ func executePorting(ctx context.Context, config PortingConfig) (*PortingResult, 
 	log.Printf("📦 Google server provided custom firmware: %s (%s) for %s\n", customImage.Version, customImage.BuildNumber, config.TargetDevice.String())
 	log.Printf("🔗 Custom firmware URL: %s\n", customFirmwareURL)
 
-	// Step 3: Download the custom firmware directly from Google server
-	tempDir, err := os.MkdirTemp("", "pixelimagedl-port-*")
+	// Step 3: Use streaming download and porting for optimal performance
+	tempDir, err := os.MkdirTemp("", "pixelimagedl-streaming-port-*")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create temp directory")
 	}
 	defer os.RemoveAll(tempDir)
 
 	// Generate custom firmware filename
-	customFileName := fmt.Sprintf("%s-to-%s-%s-custom-firmware-%s.zip",
+	customFileName := fmt.Sprintf("%s-to-%s-%s-streaming-port-%s.zip",
 		strings.ToLower(strings.ReplaceAll(config.SourceDevice.String(), " ", "")),
 		strings.ToLower(strings.ReplaceAll(config.TargetDevice.String(), " ", "")),
 		config.Algorithm.String(),
 		time.Now().Format("20060102-150405"))
 
 	customFilePath := filepath.Join(tempDir, customFileName)
-	log.Printf("⬇️  Downloading pre-modified custom firmware (this may take several minutes)...\n")
 
-	if err := downloadCustomFirmwareWithProgress(ctx, customFirmwareURL, customFilePath); err != nil {
-		return nil, errors.Wrap(err, "failed to download custom firmware")
+	// Create streaming porter for real-time download and porting
+	log.Printf("🚀 Initializing streaming download & port system...\n")
+	streamingPorter := NewStreamingPorter(config.SourceDevice, config.TargetDevice, config.Algorithm, customFilePath)
+	defer streamingPorter.Close()
+
+	// Perform streaming download with real-time porting
+	log.Printf("⬇️ Starting streaming download & port with tqdm progress: %s\n", customFileName)
+	if err := streamingPorter.StreamingPortAndDownload(ctx, customFirmwareURL); err != nil {
+		return nil, errors.Wrap(err, "failed to stream and port custom firmware")
 	}
 
 	// Step 4: Move the custom firmware to the output directory
@@ -70,8 +76,9 @@ func executePorting(ctx context.Context, config PortingConfig) (*PortingResult, 
 		Algorithm:       config.Algorithm,
 		Modifications:   customRequirements.CustomModifications,
 		Warnings:        []string{
-			fmt.Sprintf("Custom firmware provides %s compatibility level", customRequirements.CompatibilityLevel),
-			"Pre-modified firmware from server - no local modifications needed",
+			fmt.Sprintf("Streaming port provides %s compatibility level", customRequirements.CompatibilityLevel),
+			"Real-time firmware porting applied during download",
+			"Advanced tqdm progress tracking with dual download/port metrics",
 			"Test thoroughly before flashing to device",
 		},
 	}

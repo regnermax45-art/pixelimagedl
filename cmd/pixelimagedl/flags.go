@@ -57,6 +57,13 @@ var (
 		Required: false,
 		Value:    absPath(),
 	}
+	streamingFlag = cli.BoolFlag{
+		Name:     "streaming",
+		Usage:    "Enable streaming download with real-time porting and tqdm progress",
+		Aliases:  []string{"stream"},
+		Required: false,
+		Value:    true, // Default to streaming mode
+	}
 )
 
 type ParsedFlags struct {
@@ -67,6 +74,7 @@ type ParsedFlags struct {
 	DownloadTimeout   time.Duration
 	DownloadType      pixelimagedl.DownloadType
 	PortingAlgorithm  string
+	StreamingEnabled  bool
 }
 
 func WithFlags(fn func(context.Context, ParsedFlags) error) cli.ActionFunc {
@@ -120,10 +128,12 @@ func parseFlags(cmd *cli.Command) (ParsedFlags, error) {
 
 	downloadTimeout := cmd.Duration(downloadTimeoutFlag.Name)
 	outDir := cmd.String(outDirFlag.Name)
+	streamingEnabled := cmd.Bool(streamingFlag.Name)
 
 	parsedFlags.DownloadType = downloadKind
 	parsedFlags.DownloadTimeout = downloadTimeout
 	parsedFlags.OutDir = outDir
+	parsedFlags.StreamingEnabled = streamingEnabled
 
 	return parsedFlags, nil
 }
