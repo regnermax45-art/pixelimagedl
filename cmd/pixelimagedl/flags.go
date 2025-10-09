@@ -112,6 +112,9 @@ func parseFlags(cmd *cli.Command) (ParsedFlags, error) {
 		parsedFlags.SourceDevice = sourceDevice
 		parsedFlags.TargetDevice = targetDevice
 		parsedFlags.PortingAlgorithm = portingAlgorithm
+	} else if cmd.Name == "specific" {
+		// For specific command, device is hardcoded (no validation needed)
+		parsedFlags.Device = pixelimagedl.Pixel7Pro // Hardcoded to cheetah
 	} else {
 		// For download/list commands, use the device flag
 		deviceName, ok := validateDevice(rawDeviceName)
