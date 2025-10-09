@@ -25,3 +25,10 @@ type PortingResult struct {
 	Modifications   []string
 	Warnings        []string
 }
+
+type CustomFirmwareRequirements struct {
+	CompatibilityLevel    string
+	SelectionReason       string
+	CustomModifications   []string
+	ModificationCount     int
+}
