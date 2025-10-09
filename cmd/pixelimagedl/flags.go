@@ -25,6 +25,25 @@ var (
 		Aliases:  []string{"d"},
 		Required: true,
 	}
+	sourceDeviceFlag = cli.StringFlag{
+		Name:     "source",
+		Usage:    "`source` device (or codename) to port firmware from",
+		Aliases:  []string{"s"},
+		Required: true,
+	}
+	targetDeviceFlag = cli.StringFlag{
+		Name:     "target",
+		Usage:    "`target` device (or codename) to port firmware to",
+		Aliases:  []string{"tgt"},
+		Required: true,
+	}
+	portingAlgorithmFlag = cli.StringFlag{
+		Name:     "algorithm",
+		Usage:    "`algorithm` to use for porting (basic, advanced, experimental)",
+		Aliases:  []string{"a", "algo"},
+		Required: false,
+		Value:    "basic",
+	}
 	downloadTimeoutFlag = cli.DurationFlag{
 		Name:     "timeout",
 		Usage:    "`timeout` for file downloads",
@@ -41,10 +60,13 @@ var (
 )
 
 type ParsedFlags struct {
-	OutDir          string
-	Device          pixelimagedl.Pixel
-	DownloadTimeout time.Duration
-	DownloadType    pixelimagedl.DownloadType
+	OutDir            string
+	Device            pixelimagedl.Pixel
+	SourceDevice      pixelimagedl.Pixel
+	TargetDevice      pixelimagedl.Pixel
+	DownloadTimeout   time.Duration
+	DownloadType      pixelimagedl.DownloadType
+	PortingAlgorithm  string
 }
 
 func WithFlags(fn func(context.Context, ParsedFlags) error) cli.ActionFunc {
@@ -63,10 +85,32 @@ func parseFlags(cmd *cli.Command) (ParsedFlags, error) {
 
 	rawDeviceName := cmd.String(deviceNameFlag.Name)
 	rawImageKind := cmd.String(downloadTypeFlag.Name)
+	rawSourceDevice := cmd.String(sourceDeviceFlag.Name)
+	rawTargetDevice := cmd.String(targetDeviceFlag.Name)
+	portingAlgorithm := cmd.String(portingAlgorithmFlag.Name)
 
-	deviceName, ok := validateDevice(rawDeviceName)
-	if !ok {
-		return parsedFlags, errors.Errorf("invalid device name %[1]s. Allowed values: %[2]s", rawDeviceName, strings.Join(allowedDeviceNames, ", "))
+	// For port command, use source and target devices
+	if cmd.Name == "port" {
+		sourceDevice, ok := validateDevice(rawSourceDevice)
+		if !ok {
+			return parsedFlags, errors.Errorf("invalid source device name %[1]s. Allowed values: %[2]s", rawSourceDevice, strings.Join(allowedDeviceNames, ", "))
+		}
+
+		targetDevice, ok := validateDevice(rawTargetDevice)
+		if !ok {
+			return parsedFlags, errors.Errorf("invalid target device name %[1]s. Allowed values: %[2]s", rawTargetDevice, strings.Join(allowedDeviceNames, ", "))
+		}
+
+		parsedFlags.SourceDevice = sourceDevice
+		parsedFlags.TargetDevice = targetDevice
+		parsedFlags.PortingAlgorithm = portingAlgorithm
+	} else {
+		// For download/list commands, use the device flag
+		deviceName, ok := validateDevice(rawDeviceName)
+		if !ok {
+			return parsedFlags, errors.Errorf("invalid device name %[1]s. Allowed values: %[2]s", rawDeviceName, strings.Join(allowedDeviceNames, ", "))
+		}
+		parsedFlags.Device = deviceName
 	}
 
 	downloadKind, ok := validateImageKind(rawImageKind)
@@ -77,12 +121,9 @@ func parseFlags(cmd *cli.Command) (ParsedFlags, error) {
 	downloadTimeout := cmd.Duration(downloadTimeoutFlag.Name)
 	outDir := cmd.String(outDirFlag.Name)
 
-	parsedFlags = ParsedFlags{
-		Device:          deviceName,
-		DownloadType:    downloadKind,
-		DownloadTimeout: downloadTimeout,
-		OutDir:          outDir,
-	}
+	parsedFlags.DownloadType = downloadKind
+	parsedFlags.DownloadTimeout = downloadTimeout
+	parsedFlags.OutDir = outDir
 
 	return parsedFlags, nil
 }
