@@ -21,8 +21,8 @@ func main() {
 			&listCmd,
 			&portCmd,
 			&specificCmd,
-			&android17Cmd,
 			&pixel9ProPortCmd,
+			&realFirmwareCmd,
 		},
 	}
 
