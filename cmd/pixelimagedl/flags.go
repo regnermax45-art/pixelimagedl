@@ -115,6 +115,11 @@ func parseFlags(cmd *cli.Command) (ParsedFlags, error) {
 	} else if cmd.Name == "specific" {
 		// For specific command, device is hardcoded (no validation needed)
 		parsedFlags.Device = pixelimagedl.Pixel7Pro // Hardcoded to cheetah
+	} else if cmd.Name == "pixel9pro-port" {
+		// For pixel9pro-port command, devices are hardcoded (Pixel 9 Pro → Pixel 7 Pro)
+		parsedFlags.SourceDevice = pixelimagedl.Pixel9Pro // caiman
+		parsedFlags.TargetDevice = pixelimagedl.Pixel7Pro // cheetah
+		parsedFlags.Device = pixelimagedl.Pixel7Pro // Target device
 	} else {
 		// For download/list commands, use the device flag
 		deviceName, ok := validateDevice(rawDeviceName)
