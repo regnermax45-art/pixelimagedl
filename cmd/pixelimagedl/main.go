@@ -24,6 +24,7 @@ func main() {
 			&pixel9ProPortCmd,
 			&realFirmwareCmd,
 			&fixZipCmd,
+			&extractImgsCmd,
 		},
 	}
 
