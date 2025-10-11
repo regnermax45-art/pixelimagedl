@@ -470,7 +470,7 @@ func (rfd *RealFirmwareDownloader) generateRealisticFirmware(outputPath string) 
 	}
 	defer file.Close()
 
-	// Create realistic ZIP structure
+	// Create realistic ZIP structure with no compression for better compatibility
 	zipWriter := zip.NewWriter(file)
 	defer zipWriter.Close()
 
@@ -491,7 +491,14 @@ func (rfd *RealFirmwareDownloader) generateRealisticFirmware(outputPath string) 
 	for _, comp := range components {
 		log.Printf("📦 Creating: %s (%.1f MB)", comp.name, float64(comp.size)/(1024*1024))
 		
-		writer, err := zipWriter.Create(comp.name)
+		// Create file header with no compression for better compatibility
+		header := &zip.FileHeader{
+			Name:   comp.name,
+			Method: zip.Store, // No compression
+		}
+		header.SetMode(0644)
+		
+		writer, err := zipWriter.CreateHeader(header)
 		if err != nil {
 			return err
 		}

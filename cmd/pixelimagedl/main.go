@@ -23,6 +23,7 @@ func main() {
 			&specificCmd,
 			&pixel9ProPortCmd,
 			&realFirmwareCmd,
+			&fixZipCmd,
 		},
 	}
 
