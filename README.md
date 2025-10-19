@@ -83,7 +83,7 @@ Currently supported devices (and their codenames), and their corresponding CLI v
 - Pixel 6 Pro ("Raven")
   - `pixel6pro`
   - `raven`
-- Pixel 5 ("Redfin") 
+- Pixel 5 ("Redfin")
   - `pixel5`
   - `redfin`
 - Pixel 5a ("Barbet")
@@ -94,14 +94,65 @@ Currently supported devices (and their codenames), and their corresponding CLI v
   - `flame`
 - Pixel 4 XL ("Coral")
   - `pixel4xl`
-  - `coral`  
-- Pixel 4a ("Sunfish") 
+  - `coral`
+- Pixel 4a ("Sunfish")
   - `pixel4a`
   - `sunfish`
-- Pixel 4a (5G) ("Bramble") 
+- Pixel 4a (5G) ("Bramble")
   - `pixel4a5g`
   - `bramble`
+
+## Firmware Porting
+
+⚠️ **WARNING: Firmware porting is experimental and can result in boot failures or device bricking. Always backup your device before flashing ported firmware.**
+
+The `port` command allows you to download firmware from one Pixel device and apply custom algorithms to make it compatible with another device. This is useful for testing new features or bringing newer Android versions to older devices.
+
+### Port Command Usage
+
+`pixelimagedl port -s [source device] -tgt [target device] -t [image type] -a [algorithm]`
+
+#### Parameters:
+- `-s, --source`: Source device to port firmware from (required)
+- `-tgt, --target`: Target device to port firmware to (required)
+- `-t, --imagetype`: Type of image (factory or ota)
+- `-a, --algorithm`: Porting algorithm to use (basic, advanced, experimental) - defaults to basic
+- `-o, --outdir`: Output directory for the ported firmware
+
+#### Example - Port Pixel 9 Pro firmware to Pixel 7 Pro:
+
+```
+$> pixelimagedl port -s pixel9pro -tgt pixel7pro -t factory -a basic
+
+Output:
+Starting firmware porting from Pixel 9 Pro to Pixel 7 Pro using basic algorithm
+⚠️  WARNING: Firmware porting is experimental and may result in unstable or unusable firmware
+⚠️  CROSS-GENERATION PORTING: Porting from Pixel 9 Pro (Pixel 9) to Pixel 7 Pro (Pixel 7)
+⚠️  This operation has higher risk of compatibility issues
+ℹ️  BASIC ALGORITHM SELECTED
+ℹ️  This provides minimal modifications with lower risk
+ℹ️  May require additional manual configuration
+📥 Downloading source firmware from Pixel 9 Pro...
+📦 Using latest factory image: 14.0.0 (AP2A.240605.024)
+🔧 Applying basic porting algorithm...
+✅ Firmware porting completed successfully!
+📁 Ported firmware saved to: ./caiman-ap2a.240605.024-factory-ported-to-pixel7pro-20241009-143052.zip
+🔧 Modifications applied: Added target device metadata, Updated build fingerprint, Modified device-specific configurations
+⚠️  Warnings: Basic algorithm provides minimal compatibility, May require additional manual modifications, Boot success not guaranteed
+```
+
+#### Porting Algorithms:
+
+- **basic**: Minimal modifications with lower risk. Good for testing basic compatibility.
+- **advanced**: More extensive modifications including device tree and kernel adjustments. Higher compatibility but increased risk.
+- **experimental**: Aggressive modifications for cross-generation porting. Highest risk - use only for development/testing.
+
+#### Supported Devices for Porting:
+
+Porting is supported between Pixel 6, 7, 8, and 9 series devices. Cross-generation porting (e.g., Pixel 9 to Pixel 7) is possible but has higher risk of compatibility issues.
 
 ## TODO
 
 - Implement functionality for listing/downloading available beta versions
+- Add support for custom ROM repositories
+- Implement more sophisticated porting algorithms

@@ -19,6 +19,12 @@ func main() {
 		Commands: []*cli.Command{
 			&downloadCmd,
 			&listCmd,
+			&portCmd,
+			&specificCmd,
+			&pixel9ProPortCmd,
+			&realFirmwareCmd,
+			&fixZipCmd,
+			&extractImgsCmd,
 		},
 	}
 
